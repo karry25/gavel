@@ -1,0 +1,12 @@
+The workspace root is a copy of the Flask repo; paths are relative to it (e.g. src/flask/cli.py).
+
+Task: add a new built-in CLI command `flask config` that prints the loaded application's configuration as JSON, masking the values of any key containing SECRET, PASSWORD, TOKEN or KEY as "***". It must appear in flask --help, be covered by a test in tests/test_cli.py, and be documented alongside the other built-in commands in docs/cli.rst.
+
+Progress so far: two edits to src/flask/cli.py are ALREADY STAGED (not yet on disk): they add `import json` and begin the new command. Do not re-stage those parts.
+
+Do this, in order, with tool calls only (no long prose):
+1. Call list_staged_edits to see exactly what is staged.
+2. Read the region of src/flask/cli.py around the staged edits (read_file or read_symbol) and stage any one remaining cli.py edit needed so the command body is complete and correct (uses current_app.config, json.dumps with default=str, masks matching keys, registered like the other built-in commands).
+3. Stage one edit to tests/test_cli.py adding a test: the command prints valid JSON, includes normal config values, and masks SECRET/PASSWORD/TOKEN/KEY values as "***".
+4. Stage one edit to docs/cli.rst documenting `flask config` next to the other built-in commands.
+5. STOP and summarize what is staged. Do NOT call apply_staged_edits - the user reviews staged edits first.

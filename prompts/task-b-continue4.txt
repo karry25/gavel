@@ -1,0 +1,36 @@
+The workspace root is a copy of the Flask repo; paths are relative to it (e.g. src/flask/cli.py).
+
+Task: add a new built-in CLI command `flask config` that prints the loaded application's configuration as JSON, masking the values of any key containing SECRET, PASSWORD, TOKEN or KEY as "***". It must appear in flask --help, be covered by a test in tests/test_cli.py, and be documented alongside the other built-in commands in docs/cli.rst.
+
+Current staged state (trust this):
+- Staged edit #1 on src/flask/cli.py: adds `import json` after the werkzeug import. GOOD, keep. Do not reject it.
+- Staged edit #2 on src/flask/cli.py: adds `self.add_command(config_command)` after `self.add_command(routes_command)` in FlaskGroup.__init__. GOOD, keep. Do not reject it.
+- Staged edit #3 on src/flask/cli.py: defines _mask_config and config_command, but it is BROKEN: every line has 4 leading spaces, so applying it makes the file fail to import (indented def at module level). You must replace it.
+
+Do this, in order, with tool calls only (no long prose, minimal extra reads):
+1. reject_staged_edit n=3 (only #3; never #1 or #2).
+2. stage_edit on src/flask/cli.py with old_string exactly `cli = FlaskGroup(` (it appears once, at column 0, around line 1118). The new_string must be the helper and command at COLUMN 0 (no leading spaces on any line), then `cli = FlaskGroup(` also at column 0:
+
+def _mask_config(key, value):
+    upper = key.upper()
+    if any(sub in upper for sub in ("SECRET", "PASSWORD", "TOKEN", "KEY")):
+        return "***"
+    try:
+        json.dumps(value)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
+
+
+@click.command("config", short_help="Show the configuration of the app.")
+@with_appcontext
+def config_command():
+    masked = {k: _mask_config(k, v) for k, v in current_app.config.items()}
+    click.echo(json.dumps(masked, indent=2, sort_keys=True, default=str))
+
+
+cli = FlaskGroup(
+
+3. stage_edit on tests/test_cli.py: add a test in the style of the existing tests around line 325 that runs the `config` command via the click runner, asserts exit_code 0, json.loads the output, checks a normal config value appears and that keys containing SECRET/PASSWORD/TOKEN/KEY show "***".
+4. stage_edit on docs/cli.rst: document `flask config` alongside the other built-in commands.
+5. STOP and summarize what is staged. Do NOT call apply_staged_edits - the user reviews staged edits first.

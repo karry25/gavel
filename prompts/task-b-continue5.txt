@@ -1,0 +1,32 @@
+The workspace root is a copy of the Flask repo; paths are relative to it (e.g. src/flask/cli.py).
+
+Task: add a new built-in CLI command `flask config` that prints the loaded application's configuration as JSON, masking the values of any key containing SECRET, PASSWORD, TOKEN or KEY as "***". It must appear in flask --help, be covered by a test in tests/test_cli.py, and be documented alongside the other built-in commands in docs/cli.rst.
+
+Current staged state (trust this): two GOOD edits are already staged on src/flask/cli.py - (1) `import json` after the werkzeug import, (2) `self.add_command(config_command)` after `self.add_command(routes_command)`. NEVER call reject_staged_edit. If list_staged_edits already shows a config_command definition edit too, skip step 1.
+
+Do this, in order, with tool calls only (no long prose, minimal extra reads):
+1. stage_edit on src/flask/cli.py defining the command AT COLUMN 0 (the anchor `cli = FlaskGroup(` is at column 0, appears exactly once, around line 1118; no leading spaces on any added line). old_string exactly `cli = FlaskGroup(`. new_string:
+
+def _mask_config(key, value):
+    upper = key.upper()
+    if any(sub in upper for sub in ("SECRET", "PASSWORD", "TOKEN", "KEY")):
+        return "***"
+    try:
+        json.dumps(value)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
+
+
+@click.command("config", short_help="Show the configuration of the app.")
+@with_appcontext
+def config_command():
+    masked = {k: _mask_config(k, v) for k, v in current_app.config.items()}
+    click.echo(json.dumps(masked, indent=2, sort_keys=True, default=str))
+
+
+cli = FlaskGroup(
+
+2. stage_edit on tests/test_cli.py: add a test in the style of the existing tests around line 325 that runs the `config` command via the click runner, asserts exit_code 0, json.loads the output, checks a normal config value appears and that keys containing SECRET/PASSWORD/TOKEN/KEY show "***".
+3. stage_edit on docs/cli.rst: document `flask config` alongside the other built-in commands.
+4. STOP and summarize what is staged. Do NOT call apply_staged_edits - the user reviews staged edits first.

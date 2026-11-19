@@ -1,0 +1,7 @@
+node_modules/
+logs/
+.venv/
+*.log
+flask-fixture/
+extension/node_modules/
+extension/out/

@@ -1,0 +1,30 @@
+{
+  "name": "gavel",
+  "displayName": "Gavel",
+  "description": "Repo-aware inline code editing via the TrueForge API and MCP file tools",
+  "version": "0.1.0",
+  "publisher": "gavel",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      { "command": "gavel.ask", "title": "Gavel: Ask the Agent" },
+      { "command": "gavel.inlineEdit", "title": "Gavel: Inline Edit Selection" }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@truefoundry/trueforge-sdk": "^0.184.1"
+  }
+}

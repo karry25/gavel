@@ -1,0 +1,1 @@
+Read the file TASK_B_EDITS.md in the repo root. Stage every edit it lists, one stage_edit call per edit, copying the OLD and NEW blocks exactly as old_string and new_string. Then call list_staged_edits and stop. Do not explore the repo or change anything else.

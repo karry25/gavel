@@ -1,0 +1,12 @@
+{
+  "name": "gavel",
+  "version": "1.0.0",
+  "description": "Gavel - repo-aware inline code editing via TrueForge + MCP",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@truefoundry/trueforge-sdk": "^0.184.1",
+    "express": "^5.3.0"
+  }
+}

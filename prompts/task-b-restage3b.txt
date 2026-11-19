@@ -1,0 +1,38 @@
+Staged edit #3 keeps getting corrupted. One more time, with a SIMPLER anchor. Stage exactly ONE edit with a single stage_edit call, then STOP and reply DONE. old_string is exactly: cli = FlaskGroup(  (that one line, nothing else - it occurs exactly once in the file). new_string is the following code block, then two blank lines, then that same anchor line again as the LAST thing - use \n for every newline, and make sure the string ENDS with 'cli = FlaskGroup(' with nothing after it. Copy the block character-for-character, including the 4-space indents:
+
+def _mask_config(key, value):
+    upper = key.upper()
+    if any(sub in upper for sub in ("SECRET", "PASSWORD", "TOKEN", "KEY")):
+        return "***"
+    try:
+        json.dumps(value)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
+
+
+@click.command("config", short_help="Show the configuration of the app.")
+@with_appcontext
+def config_command():
+    masked = {k: _mask_config(k, v) for k, v in current_app.config.items()}
+    click.echo(json.dumps(masked, indent=2, sort_keys=True, default=str))
+
+
+++ b/tests/test_cli.py
+import json
+
+    def test_config_command(self, runner):
+        app = Flask(__name__)
+        app.config["SECRET_KEY"] = "supersecretvalue"
+        app.config["DB_PASSWORD"] = "hunter2"
+        app.config["PLAIN_SETTING"] = "visible"
+        cli = FlaskGroup(create_app=lambda: app)
+        result = runner.invoke(cli, ["config"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert data["SECRET_KEY"] == "***"
+        assert data["DB_PASSWORD"] == "***"
+        assert data["PLAIN_SETTING"] == "visible"
+
+So new_string as one line with escapes looks like: def _mask_config(key, value):\n    upper = key.upper()\n    if any(sub in upper  ...  == "***"\n        assert data["PLAIN_SETTING"] == "visible"
+Do not add, rename, reorder or omit anything.

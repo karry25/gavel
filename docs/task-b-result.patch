@@ -1,0 +1,99 @@
+diff --git a/docs/cli.rst b/docs/cli.rst
+index a72e6d5..1a14e8b 100644
+--- a/docs/cli.rst
++++ b/docs/cli.rst
+@@ -315,6 +315,21 @@ committed to the repository so that it works automatically wherever the project
+ is checked out.
+ 
+ 
++Showing the Configuration
++-------------------------
++
++The ``flask config`` command prints the application's configuration as
++sorted JSON. Secret-looking values are masked as ``***``.
++
++.. code-block:: text
++
++    $ flask config
++    {
++      "SECRET_KEY": "***",
++      ...
++    }
++
++
+ Custom Commands
+ ---------------
+ 
+diff --git a/src/flask/cli.py b/src/flask/cli.py
+index ed11f25..f7c49c3 100644
+--- a/src/flask/cli.py
++++ b/src/flask/cli.py
+@@ -19,6 +19,7 @@ from click.core import ParameterSource
+ from werkzeug import run_simple
+ from werkzeug.serving import is_running_from_reloader
+ from werkzeug.utils import import_string
++import json
+ 
+ from .globals import current_app
+ from .helpers import get_debug_flag
+@@ -594,6 +595,7 @@ class FlaskGroup(AppGroup):
+             self.add_command(run_command)
+             self.add_command(shell_command)
+             self.add_command(routes_command)
++            self.add_command(config_command)
+ 
+         self._loaded_plugin_commands = False
+ 
+@@ -1115,6 +1117,24 @@ def routes_command(sort: str, all_methods: bool) -> None:
+         click.echo(template.format(*row))
+ 
+ 
++def _mask_config(key, value):
++    upper = key.upper()
++    if any(sub in upper for sub in ("SECRET", "PASSWORD", "TOKEN", "KEY")):
++        return "***"
++    try:
++        json.dumps(value)
++        return value
++    except (TypeError, ValueError):
++        return str(value)
++
++
++@click.command("config", short_help="Show the configuration of the app.")
++@with_appcontext
++def config_command():
++    masked = {k: _mask_config(k, v) for k, v in current_app.config.items()}
++    click.echo(json.dumps(masked, indent=2, sort_keys=True, default=str))
++
++
+ cli = FlaskGroup(
+     name="flask",
+     help="""\
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index e254c1d..3f28dc3 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -1,6 +1,7 @@
+ # This file was part of Flask-CLI and was modified under the terms of
+ # its Revised BSD License. Copyright © 2015 CERN.
+ import importlib.metadata
++import json
+ import os
+ import platform
+ import ssl
+@@ -499,6 +500,15 @@ class TestRoutes:
+         assert result.exit_code == 0
+         assert "No routes were registered." in result.output
+ 
++    def test_config_command(self, runner):
++        app = Flask(__name__)
++        app.config["SECRET_KEY"] = "supersecretvalue"
++
++        cli = FlaskGroup(create_app=lambda: app)
++        result = runner.invoke(cli, ["config"])
++        assert result.exit_code == 0
++        assert json.loads(result.output)["SECRET_KEY"] == "***"
++
+     def test_subdomain(self, runner):
+         app = Flask(__name__, static_folder=None)
+         app.add_url_rule("/a", subdomain="a", endpoint="a")

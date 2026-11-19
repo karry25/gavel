@@ -1,0 +1,11 @@
+Task C (Resilience), exact from the Forge-a-thon brief:
+
+Configure TrueForge with an unreachable endpoint or an invalid key, then repeat Task A.
+
+Verification: Show that the editor stays responsive, the user sees a clear message
+(or a second configured model takes over automatically), and git status shows no
+files changed.
+
+Rubric B3 anchors: 0 hang/stack trace/files changed; 4 clear error message, workspace
+unchanged; 7 retry with backoff, then a clear error, workspace unchanged; 10 automatic
+fallback to a second configured model with no user action, workspace unchanged.

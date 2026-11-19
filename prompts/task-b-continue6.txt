@@ -1,0 +1,13 @@
+The workspace root is a copy of the Flask repo; paths are relative to it (e.g. src/flask/cli.py).
+
+Task: finish adding the built-in CLI command `flask config` (prints app config as JSON, masks values of keys containing SECRET, PASSWORD, TOKEN or KEY as "***"). Code edits are already staged; only a duplicate cleanup, a test, and docs remain.
+
+Current staged state (trust this, do NOT re-read cli.py to confirm):
+- Edits #1-#3 on src/flask/cli.py are GOOD and complete: #1 adds `import json`, #2 adds `self.add_command(config_command)` registration, #3 defines _mask_config + config_command at column 0 before `cli = FlaskGroup(`. NEVER reject these.
+- Edit #4 on src/flask/cli.py is an exact DUPLICATE of #3 (same anchor, same content). It must be removed or the command gets defined twice.
+
+Do this, in order, with tool calls only (no long prose, minimal reads):
+1. reject_staged_edit n=4 (only #4).
+2. stage_edit on tests/test_cli.py: add a test in the style of the existing tests around line 325 that runs the `config` command via the click runner, asserts exit_code 0, json.loads the output, checks a normal config value appears and that keys containing SECRET/PASSWORD/TOKEN/KEY show "***".
+3. stage_edit on docs/cli.rst: document `flask config` alongside the other built-in commands.
+4. STOP and summarize what is staged. Do NOT call apply_staged_edits - the user reviews staged edits first.

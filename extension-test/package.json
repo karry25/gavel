@@ -1,0 +1,6 @@
+{
+  "name": "gavel-extension-test",
+  "private": true,
+  "version": "0.0.1",
+  "dependencies": { "@vscode/test-electron": "^2.4.1" }
+}
